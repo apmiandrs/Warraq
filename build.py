@@ -49,6 +49,7 @@ def build_app(mode="onedir"):
         f"--add-data={BASE_DIR / 'icon.ico'};.",
         f"--add-data={BASE_DIR / 'core'};core",
         f"--add-data={BASE_DIR / 'ui'};ui",
+        "--hidden-import=PySide6",
         "--hidden-import=pytesseract",
         "--hidden-import=pdf2image",
         "--hidden-import=pypdf",
