@@ -17,7 +17,7 @@ def main():
 
         # 2. إنشاء التطبيق
         app = QApplication(sys.argv)
-        app.setApplicationName("PDF Image to Text Converter")
+        app.setApplicationName("Warraq")
         app.setApplicationVersion(VERSION)
         
         # 3. إعداد أيقونة البرنامج

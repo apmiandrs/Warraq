@@ -328,7 +328,7 @@ class CreditsDialog(QDialog):
         layout.addWidget(icon_label)
 
         # العنوان
-        title_label = QLabel("المساعد الذكي للملفات")
+        title_label = QLabel("وراق - Warraq")
         title_label.setAlignment(Qt.AlignCenter)
         title_label.setFont(QFont("Arial", 20, QFont.Bold))
         layout.addWidget(title_label)

@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         self.setup_ui()
 
     def setup_ui(self):
-        self.setWindowTitle(f"المساعد الذكي للملفات - الإصدار {VERSION}")
+        self.setWindowTitle(f"وراق - Warraq | الإصدار {VERSION}")
         self.setMinimumSize(1000, 750)
         
         central_widget = QWidget()
@@ -119,7 +119,7 @@ class MainWindow(QMainWindow):
         title_layout = QHBoxLayout(self.title_container)
         title_layout.setContentsMargins(10, 0, 10, 0)
         
-        self.title_label = QLabel("المساعد الذكي للملفات")
+        self.title_label = QLabel("وراق - Warraq")
         self.title_label.setFont(QFont("Arial", 14, QFont.Bold))
         self.title_label.setStyleSheet("color: white; background: transparent;")
         
@@ -179,7 +179,7 @@ class MainWindow(QMainWindow):
         logo_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(logo_label)
 
-        welcome_label = QLabel("مرحباً بك في المساعد الذكي للملفات")
+        welcome_label = QLabel("مرحباً بك في وراق - Warraq")
         welcome_label.setAlignment(Qt.AlignCenter)
         welcome_label.setStyleSheet("font-size: 24px; font-weight: bold; margin-bottom: 20px;")
         layout.addWidget(welcome_label)
