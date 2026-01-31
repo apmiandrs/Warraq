@@ -124,6 +124,29 @@ class IconFactory:
             path.lineTo(margin + s * 0.5, margin + s * 0.7)
             path.addEllipse(margin + s * 0.5 - 1, margin + s * 0.85, 2, 2)
 
+        elif icon_type == "refresh":
+            # رسم سهمين دائريين (للتحويل)
+            rect = QRectF(margin, margin, s, s)
+            path.arcMoveTo(rect, 45)
+            path.arcTo(rect, 45, 270)
+            # سهم في النهاية
+            path.moveTo(margin + s * 0.8, margin + s * 0.2)
+            path.lineTo(margin + s, margin + s * 0.2)
+            path.lineTo(margin + s, margin)
+            
+        elif icon_type == "compress":
+            # رسم أسهم للداخل (للضغط)
+            path.addRect(margin + s*0.2, margin + s*0.2, s*0.6, s*0.6)
+            # أسهم تشير للداخل
+            path.moveTo(margin, margin)
+            path.lineTo(margin + s*0.3, margin + s*0.3)
+            path.moveTo(margin + s, margin)
+            path.lineTo(margin + s*0.7, margin + s*0.3)
+            path.moveTo(margin, margin + s)
+            path.lineTo(margin + s*0.3, margin + s*0.7)
+            path.moveTo(margin + s, margin + s)
+            path.lineTo(margin + s*0.7, margin + s*0.7)
+
         painter.drawPath(path)
         painter.end()
         return QIcon(pixmap)

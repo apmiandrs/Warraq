@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
     QWidget, QPushButton, QLabel, QComboBox, QCheckBox,
     QLineEdit, QGroupBox, QScrollArea, QTextEdit, QProgressBar,
     QStackedWidget, QTabWidget, QFrame, QMessageBox, QGraphicsOpacityEffect,
-    QSizePolicy, QStatusBar
+    QSizePolicy, QStatusBar, QGridLayout
 )
 from PySide6.QtCore import Qt, QThread, Signal, QPropertyAnimation, QEasingCurve, QSize, QParallelAnimationGroup, QSequentialAnimationGroup, QTimer
 from PySide6.QtGui import QFont, QDragEnterEvent, QDropEvent, QIntValidator, QIcon, QPixmap
@@ -79,17 +79,23 @@ class MainWindow(QMainWindow):
         self.page_ocr = QWidget()
         self.page_pdf_tools = QWidget()
         self.page_security = QWidget()
+        self.page_conversion = QWidget()
+        self.page_compression = QWidget()
         
         self.stacked_widget.addWidget(self.page_dashboard)
         self.stacked_widget.addWidget(self.page_ocr)
         self.stacked_widget.addWidget(self.page_pdf_tools)
         self.stacked_widget.addWidget(self.page_security)
+        self.stacked_widget.addWidget(self.page_conversion)
+        self.stacked_widget.addWidget(self.page_compression)
         
         # Setup Page Layouts
         self.setup_dashboard_page()
         self.setup_ocr_page()
         self.setup_pdf_tools_page()
         self.setup_security_page()
+        self.setup_conversion_page()
+        self.setup_compression_page()
         
         # Apply Default Theme
         self.apply_light_theme()
@@ -184,16 +190,23 @@ class MainWindow(QMainWindow):
         welcome_label.setStyleSheet("font-size: 24px; font-weight: bold; margin-bottom: 20px;")
         layout.addWidget(welcome_label)
         
-        cards_layout = QHBoxLayout()
-        cards_layout.setSpacing(20)
+        cards_layout = QGridLayout()
+        cards_layout.setSpacing(30)
+        cards_layout.setAlignment(Qt.AlignCenter)
         
         self.ocr_card = self.create_tool_card("search", "استخراج النصوص", "تحويل الصور و PDF إلى نص عربي دقيق", 1)
         self.pdf_card = self.create_tool_card("file", "أدوات الصفحات", "دمج وفصل ملفات PDF بسهولة", 2)
         self.security_card = self.create_tool_card("lock", "أمان الملفات", "قفل وحماية الملفات بكلمة مرور", 3)
+        self.conversion_card = self.create_tool_card("refresh", "تحويل الصيغ", "تحويل الصور إلى PDF والعكس", 4)
+        self.compression_card = self.create_tool_card("compress", "الضغط والتحجيم", "تقليل حجم الصور وملفات PDF", 5)
+        self.soon_card = self.create_tool_card("refresh", "قريباً", "نعمل على إضافة ميزات ذكية جديدة...", 6)
         
-        cards_layout.addWidget(self.ocr_card)
-        cards_layout.addWidget(self.pdf_card)
-        cards_layout.addWidget(self.security_card)
+        cards_layout.addWidget(self.ocr_card, 0, 0)
+        cards_layout.addWidget(self.pdf_card, 0, 1)
+        cards_layout.addWidget(self.security_card, 0, 2)
+        cards_layout.addWidget(self.conversion_card, 1, 0)
+        cards_layout.addWidget(self.compression_card, 1, 1)
+        cards_layout.addWidget(self.soon_card, 1, 2)
         
         layout.addLayout(cards_layout)
         layout.addStretch()
@@ -206,7 +219,7 @@ class MainWindow(QMainWindow):
     def create_tool_card(self, icon, title, desc, index):
         card = QFrame()
         card.setObjectName("ToolCard")
-        card.setFixedSize(280, 220)
+        card.setFixedSize(240, 190)
         card.setCursor(Qt.PointingHandCursor)
         
         layout = QVBoxLayout(card)
@@ -217,8 +230,8 @@ class MainWindow(QMainWindow):
         icon_label = QLabel()
         icon_label.setObjectName("cardIconLabel") # Add object name to target in style
         icon_label.setAlignment(Qt.AlignCenter)
-        icon_label.setFixedHeight(80)
-        icon_label.setPixmap(IconFactory.create_icon(icon, color="#2c3e50", size=80).pixmap(64, 64))
+        icon_label.setFixedHeight(65)
+        icon_label.setPixmap(IconFactory.create_icon(icon, color="#2c3e50", size=60).pixmap(48, 48))
         layout.addWidget(icon_label)
         
         # العنوان
@@ -246,14 +259,14 @@ class MainWindow(QMainWindow):
         is_dark = self.is_dark_mode
         init_color = "white" if is_dark else "#2c3e50"
         init_desc_color = "rgba(255, 255, 255, 0.9)" if is_dark else "#6c757d"
-        title_label.setStyleSheet(f"color: {init_color}; background: transparent; font-size: 18px; font-weight: bold;")
-        desc_label.setStyleSheet(f"color: {init_desc_color}; background: transparent; font-size: 13px;")
+        title_label.setStyleSheet(f"color: {init_color}; background: transparent; font-size: 16px; font-weight: bold;")
+        desc_label.setStyleSheet(f"color: {init_desc_color}; background: transparent; font-size: 12px;")
         
         # تأثير hover لتغيير الألوان
         def on_enter(e):
-            icon_label.setPixmap(IconFactory.create_icon(icon, color="white", size=80).pixmap(64, 64))
-            title_label.setStyleSheet("color: white; background: transparent; font-size: 18px; font-weight: bold;")
-            desc_label.setStyleSheet("color: rgba(255, 255, 255, 0.9); background: transparent; font-size: 13px;")
+            icon_label.setPixmap(IconFactory.create_icon(icon, color="white", size=60).pixmap(48, 48))
+            title_label.setStyleSheet("color: white; background: transparent; font-size: 16px; font-weight: bold;")
+            desc_label.setStyleSheet("color: rgba(255, 255, 255, 0.9); background: transparent; font-size: 12px;")
             self.animate_card_hover(card, True)
         
         def on_leave(e):
@@ -261,9 +274,9 @@ class MainWindow(QMainWindow):
             color = "white" if is_dark else "#2c3e50"
             desc_color = "rgba(255, 255, 255, 0.9)" if is_dark else "#6c757d"
             
-            icon_label.setPixmap(IconFactory.create_icon(icon, color=color, size=80).pixmap(64, 64))
-            title_label.setStyleSheet(f"color: {color}; background: transparent; font-size: 18px; font-weight: bold;")
-            desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; font-size: 13px;")
+            icon_label.setPixmap(IconFactory.create_icon(icon, color=color, size=60).pixmap(48, 48))
+            title_label.setStyleSheet(f"color: {color}; background: transparent; font-size: 16px; font-weight: bold;")
+            desc_label.setStyleSheet(f"color: {desc_color}; background: transparent; font-size: 12px;")
             self.animate_card_hover(card, False)
         
         card.enterEvent = on_enter
@@ -491,6 +504,116 @@ class MainWindow(QMainWindow):
         u_layout.addStretch()
         
         tabs.addTab(unlock_tab, "🔓 فتح")
+        layout.addWidget(tabs)
+
+    def setup_conversion_page(self):
+        layout = QVBoxLayout(self.page_conversion)
+        layout.setContentsMargins(30, 20, 30, 20)
+        
+        tabs = QTabWidget()
+        
+        # Image to PDF
+        img2pdf_tab = QWidget()
+        i_layout = QVBoxLayout(img2pdf_tab)
+        i_layout.addWidget(QLabel("تحويل مجموعة صور إلى ملف PDF واحد:"))
+        
+        self.img2pdf_list = QTextEdit()
+        self.img2pdf_list.setPlaceholderText("قائمة الصور لإدراجها في PDF...")
+        self.img2pdf_list.setReadOnly(True)
+        i_layout.addWidget(self.img2pdf_list)
+        
+        btns_row = QHBoxLayout()
+        add_imgs_btn = QPushButton("🖼️ إضافة صور")
+        add_imgs_btn.clicked.connect(self.choose_img2pdf_files)
+        clear_imgs_btn = QPushButton("🧹 مسح")
+        clear_imgs_btn.clicked.connect(lambda: self.img2pdf_list.clear())
+        btns_row.addWidget(add_imgs_btn)
+        btns_row.addWidget(clear_imgs_btn)
+        i_layout.addLayout(btns_row)
+        
+        self.exec_img2pdf_btn = QPushButton("📄 إنشاء ملف PDF")
+        self.exec_img2pdf_btn.clicked.connect(self.run_img2pdf)
+        i_layout.addWidget(self.exec_img2pdf_btn)
+        i_layout.addStretch()
+        
+        # PDF to Images
+        pdf2img_tab = QWidget()
+        p_layout = QVBoxLayout(pdf2img_tab)
+        p_layout.addWidget(QLabel("تحويل صفحات PDF إلى صور:"))
+        
+        file_row = QHBoxLayout()
+        self.pdf2img_input = QLineEdit()
+        self.pdf2img_input.setPlaceholderText("اختر ملف PDF...")
+        browse_btn = QPushButton("📁")
+        browse_btn.clicked.connect(self.choose_pdf2img_file)
+        file_row.addWidget(self.pdf2img_input)
+        file_row.addWidget(browse_btn)
+        p_layout.addLayout(file_row)
+        
+        self.exec_pdf2img_btn = QPushButton("🖼️ استخراج الصور")
+        self.exec_pdf2img_btn.clicked.connect(self.run_pdf2img)
+        p_layout.addWidget(self.exec_pdf2img_btn)
+        p_layout.addStretch()
+        
+        tabs.addTab(img2pdf_tab, "🖼️ صور إلى PDF")
+        tabs.addTab(pdf2img_tab, "📄 PDF إلى صور")
+        layout.addWidget(tabs)
+
+    def setup_compression_page(self):
+        layout = QVBoxLayout(self.page_compression)
+        layout.setContentsMargins(30, 20, 30, 20)
+        
+        tabs = QTabWidget()
+        
+        # Compress PDF
+        pdf_comp_tab = QWidget()
+        pc_layout = QVBoxLayout(pdf_comp_tab)
+        pc_layout.addWidget(QLabel("ضغط حجم ملف PDF:"))
+        
+        file_row = QHBoxLayout()
+        self.pdf_comp_input = QLineEdit()
+        self.pdf_comp_input.setPlaceholderText("اختر ملف PDF للضغط...")
+        browse_btn = QPushButton("📁")
+        browse_btn.clicked.connect(lambda: self.pdf_comp_input.setText(QFileDialog.getOpenFileName(self, "اختر ملف PDF", "", "PDF Files (*.pdf)")[0]))
+        file_row.addWidget(self.pdf_comp_input)
+        file_row.addWidget(browse_btn)
+        pc_layout.addLayout(file_row)
+        
+        self.exec_pdf_comp_btn = QPushButton("📉 ضغط الملف")
+        self.exec_pdf_comp_btn.clicked.connect(self.run_compress_pdf)
+        pc_layout.addWidget(self.exec_pdf_comp_btn)
+        pc_layout.addStretch()
+        
+        # Compress Images
+        img_comp_tab = QWidget()
+        ic_layout = QVBoxLayout(img_comp_tab)
+        ic_layout.addWidget(QLabel("ضغط حجم الصور (تقليل الجودة لتقليل المساحة):"))
+        
+        self.img_comp_list = QTextEdit()
+        self.img_comp_list.setPlaceholderText("قائمة الصور لضغطها...")
+        self.img_comp_list.setReadOnly(True)
+        ic_layout.addWidget(self.img_comp_list)
+        
+        btns_row = QHBoxLayout()
+        add_btn = QPushButton("🖼️ إضافة صور")
+        add_btn.clicked.connect(self.choose_img_comp_files)
+        btns_row.addWidget(add_btn)
+        ic_layout.addLayout(btns_row)
+        
+        quality_row = QHBoxLayout()
+        quality_row.addWidget(QLabel("جودة الضغط (1-100):"))
+        self.quality_spin = QLineEdit("70")
+        self.quality_spin.setValidator(QIntValidator(1, 100))
+        quality_row.addWidget(self.quality_spin)
+        ic_layout.addLayout(quality_row)
+        
+        self.exec_img_comp_btn = QPushButton("📉 ضغط وفتح مجلد الحفظ")
+        self.exec_img_comp_btn.clicked.connect(self.run_compress_images)
+        ic_layout.addWidget(self.exec_img_comp_btn)
+        ic_layout.addStretch()
+        
+        tabs.addTab(pdf_comp_tab, "📄 ضغط PDF")
+        tabs.addTab(img_comp_tab, "🖼️ ضغط صور")
         layout.addWidget(tabs)
 
     # --- Re-add OCR missing methods ---
@@ -724,19 +847,22 @@ class MainWindow(QMainWindow):
         cards = [
             (self.ocr_card, "search"),
             (self.pdf_card, "file"),
-            (self.security_card, "lock")
+            (self.security_card, "lock"),
+            (self.conversion_card, "refresh"),
+            (self.compression_card, "compress"),
+            (self.soon_card, "refresh")
         ]
         
         for card, icon_name in cards:
             # تحديث الأيقونة
             card.findChild(QLabel, "cardIconLabel").setPixmap(
-                IconFactory.create_icon(icon_name, color=color, size=80).pixmap(64, 64))
+                IconFactory.create_icon(icon_name, color=color, size=60).pixmap(48, 48))
             
             # تحديث ألوان النصوص (Enforce Stylesheet override)
             card.findChild(QLabel, "cardTitle").setStyleSheet(
-                f"color: {color}; background: transparent; font-size: 18px; font-weight: bold;")
+                f"color: {color}; background: transparent; font-size: 16px; font-weight: bold;")
             card.findChild(QLabel, "cardDesc").setStyleSheet(
-                f"color: {desc_color}; background: transparent; font-size: 13px;")
+                f"color: {desc_color}; background: transparent; font-size: 12px;")
     
     def animate_theme_transition(self):
         """تأثير انتقالي سلس عند تغيير الثيم"""
@@ -1008,6 +1134,83 @@ class MainWindow(QMainWindow):
             if success:
                 self.show_custom_message("نجاح", msg, "success")
                 self.unlock_pass_input.clear()
+            else:
+                self.show_custom_message("خطأ", msg, "error")
+
+    # --- Conversion Logic ---
+
+    def choose_img2pdf_files(self):
+        files, _ = QFileDialog.getOpenFileNames(self, "اختر صور", "", "Images (*.png *.jpg *.jpeg *.bmp)")
+        if files:
+            self.img2pdf_list.setPlainText("\n".join(files))
+
+    def run_img2pdf(self):
+        files = self.img2pdf_list.toPlainText().strip().split("\n")
+        if not files or files == ['']:
+            self.show_custom_message("تنبيه", "الرجاء إضافة صور أولاً", "warning")
+            return
+        
+        output_path, _ = QFileDialog.getSaveFileName(self, "حفظ ملف PDF", "images_combined.pdf", "PDF Files (*.pdf)")
+        if output_path:
+            success, msg = PDFProcessor.images_to_pdf(files, output_path)
+            if success:
+                self.show_custom_message("نجاح", msg, "success")
+            else:
+                self.show_custom_message("خطأ", msg, "error")
+
+    def choose_pdf2img_file(self):
+        file, _ = QFileDialog.getOpenFileName(self, "اختر ملف PDF", "", "PDF Files (*.pdf)")
+        if file:
+            self.pdf2img_input.setText(file)
+
+    def run_pdf2img(self):
+        file = self.pdf2img_input.text()
+        if not file:
+            self.show_custom_message("تنبيه", "الرجاء اختيار ملف PDF أولاً", "warning")
+            return
+        
+        output_dir = QFileDialog.getExistingDirectory(self, "اختر مجلد حفظ الصور")
+        if output_dir:
+            from core.config import POPPLER_PATH
+            success, msg = PDFProcessor.pdf_to_images(file, output_dir, poppler_path=POPPLER_PATH)
+            if success:
+                self.show_custom_message("نجاح", msg, "success")
+            else:
+                self.show_custom_message("خطأ", msg, "error")
+
+    # --- Compression Logic ---
+
+    def run_compress_pdf(self):
+        file = self.pdf_comp_input.text()
+        if not file:
+            self.show_custom_message("تنبيه", "الرجاء اختيار ملف PDF أولاً", "warning")
+            return
+        
+        output_path, _ = QFileDialog.getSaveFileName(self, "حفظ الملف المضحوط", "compressed.pdf", "PDF Files (*.pdf)")
+        if output_path:
+            success, msg = PDFProcessor.compress_pdf(file, output_path)
+            if success:
+                self.show_custom_message("نجاح", msg, "success")
+            else:
+                self.show_custom_message("خطأ", msg, "error")
+
+    def choose_img_comp_files(self):
+        files, _ = QFileDialog.getOpenFileNames(self, "اختر صور للضغط", "", "Images (*.png *.jpg *.jpeg *.bmp)")
+        if files:
+            self.img_comp_list.setPlainText("\n".join(files))
+
+    def run_compress_images(self):
+        files = self.img_comp_list.toPlainText().strip().split("\n")
+        if not files or files == ['']:
+            self.show_custom_message("تنبيه", "الرجاء إضافة صور أولاً", "warning")
+            return
+        
+        quality = int(self.quality_spin.text() or "70")
+        output_dir = QFileDialog.getExistingDirectory(self, "اختر مجلد حفظ الصور المضغوطة")
+        if output_dir:
+            success, msg = PDFProcessor.compress_images(files, output_dir, quality=quality)
+            if success:
+                self.show_custom_message("نجاح", msg, "success")
             else:
                 self.show_custom_message("خطأ", msg, "error")
 

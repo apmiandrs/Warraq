@@ -3,6 +3,8 @@ import os
 import logging
 from pypdf import PdfReader, PdfWriter
 from pathlib import Path
+from PIL import Image
+from pdf2image import convert_from_path
 
 class PDFProcessor:
     """Class to handle advanced PDF operations like merging, splitting, and security."""
@@ -129,6 +131,76 @@ class PDFProcessor:
         except Exception as e:
             logging.error(f"Error decrypting PDF: {e}")
             return False, "تأكد من صحة كلمة المرور"
+
+    @staticmethod
+    def images_to_pdf(image_paths, output_path):
+        """Converts multiple images into a single PDF."""
+        try:
+            images = []
+            for path in image_paths:
+                img = Image.open(path).convert('RGB')
+                images.append(img)
+            
+            if images:
+                images[0].save(output_path, save_all=True, append_images=images[1:])
+                return True, f"تم تحويل الصور بنجاح إلى: {output_path}"
+            return False, "لم يتم العثور على صور لتحويلها"
+        except Exception as e:
+            logging.error(f"Error converting images to PDF: {e}")
+            return False, str(e)
+
+    @staticmethod
+    def pdf_to_images(pdf_path, output_dir, poppler_path=None):
+        """Converts PDF pages into images."""
+        try:
+            images = convert_from_path(pdf_path, poppler_path=poppler_path)
+            stem = Path(pdf_path).stem
+            for i, image in enumerate(images):
+                output_path = os.path.join(output_dir, f"{stem}_page_{i+1}.jpg")
+                image.save(output_path, 'JPEG')
+            return True, f"تم تحويل {len(images)} صفحة إلى صور بنجاح في: {output_dir}"
+        except Exception as e:
+            logging.error(f"Error converting PDF to images: {e}")
+            return False, str(e)
+
+    @staticmethod
+    def compress_pdf(pdf_path, output_path):
+        """Compresses a PDF file."""
+        try:
+            reader = PdfReader(pdf_path)
+            writer = PdfWriter()
+            
+            for page in reader.pages:
+                page.compress_content_streams()
+                writer.add_page(page)
+            
+            with open(output_path, "wb") as f:
+                writer.write(f)
+            return True, f"تم ضغط الملف بنجاح وحفظه في: {output_path}"
+        except Exception as e:
+            logging.error(f"Error compressing PDF: {e}")
+            return False, str(e)
+
+    @staticmethod
+    def compress_images(image_paths, output_dir, quality=70):
+        """Compresses multiple images."""
+        try:
+            for path in image_paths:
+                img = Image.open(path)
+                stem = Path(path).stem
+                ext = Path(path).suffix.lower()
+                # Ensure we handle transparency correctly if converting to JPEG
+                if ext in ['.png', '.bmp'] and quality < 100:
+                    img = img.convert('RGB')
+                    output_path = os.path.join(output_dir, f"{stem}_compressed.jpg")
+                    img.save(output_path, 'JPEG', quality=quality, optimize=True)
+                else:
+                    output_path = os.path.join(output_dir, f"{stem}_compressed{ext}")
+                    img.save(output_path, quality=quality, optimize=True)
+            return True, f"تم ضغط الصور بنجاح في: {output_dir}"
+        except Exception as e:
+            logging.error(f"Error compressing images: {e}")
+            return False, str(e)
 
     @staticmethod
     def _parse_page_range(range_str, total_pages):
