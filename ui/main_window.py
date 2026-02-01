@@ -645,7 +645,7 @@ class MainWindow(QMainWindow):
         # ربط أحداث السحب للمستوعب
         self.drop_container.dragEnterEvent = self.drag_enter_event
         self.drop_container.dropEvent = self.drop_event
-        self.drop_container.mousePressEvent = lambda e: self.choose_files()
+        self.drop_container.mousePressEvent = self.on_drop_zone_click
         
         drop_layout.addWidget(self.drop_container)
         
@@ -934,6 +934,10 @@ class MainWindow(QMainWindow):
         urls = event.mimeData().urls()
         files = [url.toLocalFile() for url in urls if url.isLocalFile()]
         self.handle_files_selected(files)
+
+    def on_drop_zone_click(self, event):
+        """التعامل مع النقر على منطقة السحب"""
+        self.choose_files()
 
     def choose_files(self):
         files, _ = QFileDialog.getOpenFileNames(
