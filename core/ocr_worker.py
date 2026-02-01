@@ -12,6 +12,7 @@ import re
 from PySide6.QtCore import QObject, Signal
 from core.utils import load_ocr_libraries
 from core.config import POPPLER_PATH
+from core.corrector import apply_corrections
 
 
 class OCRWorker(QObject):
@@ -180,27 +181,8 @@ class OCRWorker(QObject):
         for pattern in noise_patterns:
             text = re.sub(pattern, '', text, flags=re.IGNORECASE)
 
-        # 4. تصحيحات لغوية سياقية (بناءً على العينة)
-        corrections = {
-            "زقيب": "رقيب",
-            "إ(قيب": "رقيب",
-            "صالد": "خالد",
-            "تحياتئ": "تحياتي",
-            "تحياتر": "تحياتي",
-            "الْقَصَيَم": "القصيم",
-            "تَازّيُمْ": "تاريخ",
-            "تَازّي": "تاريخ",
-            "خُطاب": "خطاب",
-            "الجزانية": "الجزائية",
-            "بيّاناتها": "بياناتها",
-            "dla]": "إحالة",
-            "إحالة اوراق": "إحالة أوراق",
-            "بالأحاطة": "بالإحاطة",
-            "الموضذ": "الموضح",
-        }
-        
-        for wrong, right in corrections.items():
-            text = text.replace(wrong, right)
+        # 4. تصحيحات لغوية سياقية (بناءً على ملف corrector.py)
+        text = apply_corrections(text)
             
         # 5. تنظيف الفراغات والسطور الزائدة
         text = re.sub(r' +', ' ', text)
